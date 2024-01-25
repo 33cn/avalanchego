@@ -137,8 +137,9 @@ func (id ID) Hex() string {
 func (id ID) String() string {
 	// We assume that the maximum size of a byte slice that
 	// can be stringified is at least the length of an ID
-	s, _ := cb58.Encode(id[:])
-	return s
+	//s, _ := cb58.Encode(id[:])
+	//return s
+	return id.Hex()
 }
 
 func (id ID) MarshalText() ([]byte, error) {
