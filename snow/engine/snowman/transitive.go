@@ -588,7 +588,7 @@ func (t *Transitive) issueWithAncestors(ctx context.Context, blk snowman.Block) 
 	// issue [blk] and its ancestors into consensus
 	status := blk.Status()
 	for status.Fetched() && !t.wasIssued(blk) {
-		err := t.issue(ctx, blk, true)
+		err := t.issue(ctx, blk, false)
 		if err != nil {
 			return false, err
 		}
