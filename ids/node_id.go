@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-
 	"github.com/ava-labs/avalanchego/staking"
 	"github.com/ava-labs/avalanchego/utils"
 	"github.com/ava-labs/avalanchego/utils/hashing"
@@ -29,7 +28,8 @@ var (
 type NodeID ShortID
 
 func (id NodeID) String() string {
-	return ShortID(id).PrefixedString(NodeIDPrefix)
+	//return ShortID(id).PrefixedString(NodeIDPrefix)
+	return NodeIDPrefix + string(id.Bytes())
 }
 
 func (id NodeID) Bytes() []byte {

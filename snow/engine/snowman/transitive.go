@@ -496,7 +496,7 @@ func (t *Transitive) buildBlocks(ctx context.Context) error {
 		// Otherwise, the new block doesn't have the best chance of being confirmed.
 		parentID := blk.Parent()
 		if pref := t.Consensus.Preference(); parentID != pref {
-			t.Ctx.Log.Warn("built block with unexpected parent",
+			t.Ctx.Log.Debug("built block with unexpected parent",
 				zap.Stringer("expectedParentID", pref),
 				zap.Stringer("parentID", parentID),
 			)
