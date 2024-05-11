@@ -5,11 +5,9 @@ package bls
 
 import (
 	"errors"
-
-	blst "github.com/supranational/blst/bindings/go"
 )
 
-const PublicKeyLen = blst.BLST_P1_COMPRESS_BYTES
+const PublicKeyLen = 48
 
 var (
 	ErrNoPublicKeys               = errors.New("no public keys")
@@ -19,25 +17,20 @@ var (
 )
 
 type (
-	PublicKey          = blst.P1Affine
-	AggregatePublicKey = blst.P1Aggregate
+	PublicKey          [48]byte
+	AggregatePublicKey [48]byte
 )
 
 // PublicKeyToBytes returns the compressed big-endian format of the public key.
 func PublicKeyToBytes(pk *PublicKey) []byte {
-	return pk.Compress()
+	return pk[:]
 }
 
 // PublicKeyFromBytes parses the compressed big-endian format of the public key
 // into a public key.
 func PublicKeyFromBytes(pkBytes []byte) (*PublicKey, error) {
-	pk := new(PublicKey).Uncompress(pkBytes)
-	if pk == nil {
-		return nil, ErrFailedPublicKeyDecompress
-	}
-	if !pk.KeyValidate() {
-		return nil, errInvalidPublicKey
-	}
+	pk := new(PublicKey)
+	copy(pk[:], pkBytes)
 	return pk, nil
 }
 
@@ -49,18 +42,14 @@ func AggregatePublicKeys(pks []*PublicKey) (*PublicKey, error) {
 		return nil, ErrNoPublicKeys
 	}
 
-	var agg AggregatePublicKey
-	if !agg.Aggregate(pks, false) {
-		return nil, errFailedPublicKeyAggregation
-	}
-	return agg.ToAffine(), nil
+	return pks[0], nil
 }
 
 // Verify the [sig] of [msg] against the [pk].
 // The [sig] and [pk] may have been an aggregation of other signatures and keys.
 // Invariant: [pk] and [sig] have both been validated.
 func Verify(pk *PublicKey, sig *Signature, msg []byte) bool {
-	return sig.Verify(false, pk, false, msg, ciphersuiteSignature)
+	return false
 }
 
 // Verify the possession of the secret pre-image of [sk] by verifying a [sig] of
@@ -68,5 +57,10 @@ func Verify(pk *PublicKey, sig *Signature, msg []byte) bool {
 // The [sig] and [pk] may have been an aggregation of other signatures and keys.
 // Invariant: [pk] and [sig] have both been validated.
 func VerifyProofOfPossession(pk *PublicKey, sig *Signature, msg []byte) bool {
-	return sig.Verify(false, pk, false, msg, ciphersuiteProofOfPossession)
+	return false
+}
+
+// Serialize serialize pk
+func (p PublicKey) Serialize() []byte {
+	return p[:]
 }
