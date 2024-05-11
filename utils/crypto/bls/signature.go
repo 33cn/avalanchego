@@ -5,11 +5,9 @@ package bls
 
 import (
 	"errors"
-
-	blst "github.com/supranational/blst/bindings/go"
 )
 
-const SignatureLen = blst.BLST_P2_COMPRESS_BYTES
+const SignatureLen = 96
 
 var (
 	ErrFailedSignatureDecompress  = errors.New("couldn't decompress signature")
@@ -19,25 +17,20 @@ var (
 )
 
 type (
-	Signature          = blst.P2Affine
-	AggregateSignature = blst.P2Aggregate
+	Signature          = [96]byte
+	AggregateSignature = [96]byte
 )
 
 // SignatureToBytes returns the compressed big-endian format of the signature.
 func SignatureToBytes(sig *Signature) []byte {
-	return sig.Compress()
+	return sig[:]
 }
 
 // SignatureFromBytes parses the compressed big-endian format of the signature
 // into a signature.
 func SignatureFromBytes(sigBytes []byte) (*Signature, error) {
-	sig := new(Signature).Uncompress(sigBytes)
-	if sig == nil {
-		return nil, ErrFailedSignatureDecompress
-	}
-	if !sig.SigValidate(false) {
-		return nil, errInvalidSignature
-	}
+	sig := new(Signature)
+	copy(sig[:], sigBytes)
 	return sig, nil
 }
 
@@ -49,9 +42,5 @@ func AggregateSignatures(sigs []*Signature) (*Signature, error) {
 		return nil, errNoSignatures
 	}
 
-	var agg AggregateSignature
-	if !agg.Aggregate(sigs, false) {
-		return nil, errFailedSignatureAggregation
-	}
-	return agg.ToAffine(), nil
+	return sigs[0], nil
 }
