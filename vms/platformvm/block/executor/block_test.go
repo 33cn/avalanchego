@@ -24,6 +24,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/status"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 )
 
 func TestStatus(t *testing.T) {
@@ -146,15 +147,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -173,15 +176,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -209,15 +214,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -247,15 +254,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -288,15 +297,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -339,15 +350,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -395,15 +408,17 @@ func TestBlockOptions(t *testing.T) {
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(0.0, database.ErrNotFound)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -451,15 +466,17 @@ func TestBlockOptions(t *testing.T) {
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
+				cfg := &config.Config{
+					UptimePercentage: 0,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: 0,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -513,15 +530,17 @@ func TestBlockOptions(t *testing.T) {
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(.5, nil)
 
+				cfg := &config.Config{
+					UptimePercentage: .8,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: .8,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}
@@ -575,15 +594,17 @@ func TestBlockOptions(t *testing.T) {
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(.5, nil)
 
+				cfg := &config.Config{
+					UptimePercentage: .8,
+				}
 				manager := &manager{
 					backend: &backend{
-						state: state,
-						ctx:   snowtest.Context(t, snowtest.PChainID),
+						state:         state,
+						ctx:           snowtest.Context(t, snowtest.PChainID),
+						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
-						Config: &config.Config{
-							UptimePercentage: .8,
-						},
+						Config:  cfg,
 						Uptimes: uptimes,
 					},
 				}

@@ -25,6 +25,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/status"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/mempool"
 	"github.com/ava-labs/avalanchego/vms/platformvm/upgrade"
 )
@@ -41,6 +42,11 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 	timestamp := time.Now()
 	// One call for each of onCommitState and onAbortState.
 	parentOnAcceptState.EXPECT().GetTimestamp().Return(timestamp).Times(2)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		lastAccepted: parentID,
@@ -55,15 +61,12 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -128,6 +131,12 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	grandparentID := ids.GenerateTestID()
 	parentState := state.NewMockDiff(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			ApricotPhase5Time: time.Now().Add(time.Hour),
+			BanffTime:         mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -141,16 +150,12 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					ApricotPhase5Time: time.Now().Add(time.Hour),
-					BanffTime:         mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -217,6 +222,12 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentState := state.NewMockDiff(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			ApricotPhase5Time: time.Now().Add(time.Hour),
+			BanffTime:         mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -230,16 +241,12 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					ApricotPhase5Time: time.Now().Add(time.Hour),
-					BanffTime:         mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -320,6 +327,11 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 	parentOnDecisionState := state.NewMockDiff(ctrl)
 	parentOnCommitState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -337,15 +349,12 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -393,6 +402,11 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 	parentOnDecisionState := state.NewMockDiff(ctrl)
 	parentOnCommitState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -410,15 +424,12 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -463,6 +474,11 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 	s := state.NewMockState(ctrl)
 	mempool := mempool.NewMockMempool(ctrl)
 	parentID := ids.GenerateTestID()
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{},
@@ -471,15 +487,12 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -537,6 +550,11 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 			parentID := ids.GenerateTestID()
 			parentStatelessBlk := block.NewMockBlock(ctrl)
 			parentHeight := uint64(1)
+			cfg := &config.Config{
+				UpgradeConfig: upgrade.Config{
+					BanffTime: time.Time{}, // banff is activated
+				},
+			}
 
 			backend := &backend{
 				blkIDToState: make(map[ids.ID]*blockState),
@@ -545,15 +563,12 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 				ctx: &snow.Context{
 					Log: logging.NoLog{},
 				},
+				feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 			}
 			verifier := &verifier{
 				txExecutorBackend: &executor.Backend{
-					Config: &config.Config{
-						UpgradeConfig: upgrade.Config{
-							BanffTime: time.Time{}, // banff is activated
-						},
-					},
-					Clk: &mockable.Clock{},
+					Config: cfg,
+					Clk:    &mockable.Clock{},
 				},
 				backend: backend,
 			}
@@ -635,6 +650,11 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 			parentID := ids.GenerateTestID()
 			parentStatelessBlk := block.NewMockBlock(ctrl)
 			parentHeight := uint64(1)
+			cfg := &config.Config{
+				UpgradeConfig: upgrade.Config{
+					BanffTime: time.Time{}, // banff is activated
+				},
+			}
 
 			backend := &backend{
 				blkIDToState: make(map[ids.ID]*blockState),
@@ -643,15 +663,12 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 				ctx: &snow.Context{
 					Log: logging.NoLog{},
 				},
+				feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 			}
 			verifier := &verifier{
 				txExecutorBackend: &executor.Backend{
-					Config: &config.Config{
-						UpgradeConfig: upgrade.Config{
-							BanffTime: time.Time{}, // banff is activated
-						},
-					},
-					Clk: &mockable.Clock{},
+					Config: cfg,
+					Clk:    &mockable.Clock{},
 				},
 				backend: backend,
 			}
@@ -706,6 +723,12 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentState := state.NewMockDiff(ctrl)
 	atomicInputs := set.Of(ids.GenerateTestID())
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			ApricotPhase5Time: time.Now().Add(time.Hour),
+			BanffTime:         mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -724,16 +747,12 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					ApricotPhase5Time: time.Now().Add(time.Hour),
-					BanffTime:         mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -799,6 +818,11 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentOnCommitState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
@@ -815,15 +839,12 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -859,6 +880,11 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 	parentOnCommitState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
 
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: time.Time{}, // banff is activated
+		},
+	}
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -874,15 +900,12 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: time.Time{}, // banff is activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: backend,
 	}
@@ -914,14 +937,15 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 	s := state.NewMockState(ctrl)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: &backend{
 			blkIDToState: map[ids.ID]*blockState{
@@ -933,6 +957,7 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
+			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -959,14 +984,15 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	timestamp := time.Unix(12345, 0)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: time.Time{}, // banff is activated
+		},
+	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: time.Time{}, // banff is activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: &backend{
 			blkIDToState: map[ids.ID]*blockState{
@@ -979,6 +1005,7 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
+			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -1005,14 +1032,15 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 	s := state.NewMockState(ctrl)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: mockable.MaxTime, // banff is not activated
+		},
+	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: mockable.MaxTime, // banff is not activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: &backend{
 			blkIDToState: map[ids.ID]*blockState{
@@ -1024,6 +1052,7 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
+			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -1050,14 +1079,15 @@ func TestVerifierVisitBanffAbortBlockUnexpectedParentState(t *testing.T) {
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	timestamp := time.Unix(12345, 0)
+	cfg := &config.Config{
+		UpgradeConfig: upgrade.Config{
+			BanffTime: time.Time{}, // banff is activated
+		},
+	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
-			Config: &config.Config{
-				UpgradeConfig: upgrade.Config{
-					BanffTime: time.Time{}, // banff is activated
-				},
-			},
-			Clk: &mockable.Clock{},
+			Config: cfg,
+			Clk:    &mockable.Clock{},
 		},
 		backend: &backend{
 			blkIDToState: map[ids.ID]*blockState{
@@ -1070,6 +1100,7 @@ func TestVerifierVisitBanffAbortBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
+			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 

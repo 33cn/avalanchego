@@ -74,6 +74,7 @@ type Builder interface {
 type builder struct {
 	mempool.Mempool
 
+	feeCalculator     *fee.Calculator
 	txExecutorBackend *txexecutor.Backend
 	blkManager        blockexecutor.Manager
 
@@ -89,8 +90,10 @@ func New(
 	txExecutorBackend *txexecutor.Backend,
 	blkManager blockexecutor.Manager,
 ) Builder {
+	cfg := txExecutorBackend.Config
 	return &builder{
 		Mempool:           mempool,
+		feeCalculator:     fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		txExecutorBackend: txExecutorBackend,
 		blkManager:        blkManager,
 		resetTimer:        make(chan struct{}, 1),
@@ -247,6 +250,7 @@ func (b *builder) PackBlockTxs(targetBlockSize int) ([]*txs.Tx, error) {
 	return packBlockTxs(
 		preferredID,
 		preferredState,
+		b.feeCalculator,
 		b.Mempool,
 		b.txExecutorBackend,
 		b.blkManager,
@@ -267,6 +271,7 @@ func buildBlock(
 	blockTxs, err := packBlockTxs(
 		parentID,
 		parentState,
+		builder.feeCalculator,
 		builder.Mempool,
 		builder.txExecutorBackend,
 		builder.blkManager,
@@ -317,6 +322,7 @@ func buildBlock(
 func packBlockTxs(
 	parentID ids.ID,
 	parentState state.Chain,
+	feeCalculator *fee.Calculator,
 	mempool mempool.Mempool,
 	backend *txexecutor.Backend,
 	manager blockexecutor.Manager,
@@ -333,8 +339,6 @@ func packBlockTxs(
 	}
 
 	var (
-		feeCalculator = fee.NewStaticCalculator(backend.Config.StaticFeeConfig, backend.Config.UpgradeConfig)
-
 		blockTxs []*txs.Tx
 		inputs   set.Set[ids.ID]
 	)

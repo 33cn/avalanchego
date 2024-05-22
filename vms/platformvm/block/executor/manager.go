@@ -55,12 +55,14 @@ func NewManager(
 	validatorManager validators.Manager,
 ) Manager {
 	lastAccepted := s.GetLastAccepted()
+	cfg := txExecutorBackend.Config
 	backend := &backend{
-		Mempool:      mempool,
-		lastAccepted: lastAccepted,
-		state:        s,
-		ctx:          txExecutorBackend.Ctx,
-		blkIDToState: map[ids.ID]*blockState{},
+		Mempool:       mempool,
+		lastAccepted:  lastAccepted,
+		state:         s,
+		ctx:           txExecutorBackend.Ctx,
+		blkIDToState:  map[ids.ID]*blockState{},
+		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 
 	return &manager{
@@ -143,11 +145,10 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return err
 	}
 
-	feeCalculator := fee.NewStaticCalculator(m.txExecutorBackend.Config.StaticFeeConfig, m.txExecutorBackend.Config.UpgradeConfig)
 	return tx.Unsigned.Visit(&executor.StandardTxExecutor{
 		Backend:       m.txExecutorBackend,
 		State:         stateDiff,
-		FeeCalculator: feeCalculator,
+		FeeCalculator: m.feeCalculator,
 		Tx:            tx,
 	})
 }
