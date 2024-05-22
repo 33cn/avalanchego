@@ -19,9 +19,9 @@ func newContext(
 	timestamp time.Time,
 ) *builder.Context {
 	var (
-		feeCalc         = fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig, timestamp)
-		createSubnetFee = feeCalc.CalculateFee(&txs.CreateSubnetTx{})
-		createChainFee  = feeCalc.CalculateFee(&txs.CreateChainTx{})
+		feeCalc         = fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
+		createSubnetFee = feeCalc.CalculateFee(timestamp, &txs.CreateSubnetTx{})
+		createChainFee  = feeCalc.CalculateFee(timestamp, &txs.CreateChainTx{})
 	)
 
 	return &builder.Context{

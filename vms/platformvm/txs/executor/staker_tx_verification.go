@@ -165,7 +165,7 @@ func verifyAddValidatorTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -255,7 +255,7 @@ func verifyAddSubnetValidatorTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -332,7 +332,7 @@ func verifyRemoveSubnetValidatorTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -449,7 +449,7 @@ func verifyAddDelegatorTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -568,7 +568,7 @@ func verifyAddPermissionlessValidatorTx(
 	copy(outs[len(tx.Outs):], tx.StakeOuts)
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -712,7 +712,7 @@ func verifyAddPermissionlessDelegatorTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
@@ -766,7 +766,7 @@ func verifyTransferSubnetOwnershipTx(
 	}
 
 	// Verify the flowcheck
-	fee := feeCalculator.CalculateFee(tx)
+	fee := feeCalculator.CalculateFee(currentTimestamp, tx)
 	if err := backend.FlowChecker.VerifySpend(
 		tx,
 		chainState,
