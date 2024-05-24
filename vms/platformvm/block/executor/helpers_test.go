@@ -279,7 +279,8 @@ func addSubnet(env *environment) {
 		panic(err)
 	}
 
-	feeCalculator := fee.NewStaticCalculator(env.backend.Config.StaticFeeConfig, env.backend.Config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.backend.Config.StaticFeeConfig, env.backend.Config.UpgradeConfig)
+	feeCalculator.Update(stateDiff.GetTimestamp())
 	executor := executor.StandardTxExecutor{
 		Backend:       env.backend,
 		State:         stateDiff,

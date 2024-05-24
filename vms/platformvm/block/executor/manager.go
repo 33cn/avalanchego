@@ -62,7 +62,7 @@ func NewManager(
 		state:         s,
 		ctx:           txExecutorBackend.Ctx,
 		blkIDToState:  map[ids.ID]*blockState{},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 
 	return &manager{
@@ -145,6 +145,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return err
 	}
 
+	m.feeCalculator.Update(nextBlkTime)
 	return tx.Unsigned.Visit(&executor.StandardTxExecutor{
 		Backend:       m.txExecutorBackend,
 		State:         stateDiff,

@@ -60,7 +60,8 @@ func TestRewardValidatorTxExecuteOnCommit(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(onCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: onCommitState,
 		OnAbortState:  onAbortState,
@@ -164,7 +165,8 @@ func TestRewardValidatorTxExecuteOnAbort(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(onCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: onCommitState,
 		OnAbortState:  onAbortState,
@@ -321,7 +323,8 @@ func TestRewardDelegatorTxExecuteOnCommitPreDelegateeDeferral(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(onCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: onCommitState,
 		OnAbortState:  onAbortState,
@@ -463,7 +466,8 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(onCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: onCommitState,
 		OnAbortState:  onAbortState,
@@ -686,7 +690,8 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 	delOnAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(delOnCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: delOnCommitState,
 		OnAbortState:  delOnAbortState,
@@ -847,7 +852,8 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := fee.NewStaticCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
+	feeCalculator.Update(onCommitState.GetTimestamp())
 	txExecutor := ProposalTxExecutor{
 		OnCommitState: onCommitState,
 		OnAbortState:  onAbortState,

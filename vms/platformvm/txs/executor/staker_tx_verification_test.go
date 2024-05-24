@@ -511,7 +511,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				state         = tt.stateF(ctrl)
 				sTx           = tt.sTxF()
 				tx            = tt.txF()
-				feeCalculator = fee.NewStaticCalculator(backend.Config.StaticFeeConfig, backend.Config.UpgradeConfig)
+				feeCalculator = fee.NewCalculator(backend.Config.StaticFeeConfig, backend.Config.UpgradeConfig)
 			)
 
 			err := verifyAddPermissionlessValidatorTx(backend, feeCalculator, state, sTx, tx)

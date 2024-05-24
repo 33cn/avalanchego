@@ -154,7 +154,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -183,7 +183,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -221,7 +221,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -261,7 +261,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -304,7 +304,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -357,7 +357,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -415,7 +415,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -473,7 +473,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -537,7 +537,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,
@@ -601,7 +601,7 @@ func TestBlockOptions(t *testing.T) {
 					backend: &backend{
 						state:         state,
 						ctx:           snowtest.Context(t, snowtest.PChainID),
-						feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+						feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 					},
 					txExecutorBackend: &executor.Backend{
 						Config:  cfg,

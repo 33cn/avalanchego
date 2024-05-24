@@ -188,8 +188,9 @@ func TestTxFees(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			uTx := tt.unsignedTx()
-			fc := NewStaticCalculator(feeTestsDefaultCfg, upgrades)
-			require.Equal(t, tt.expected, fc.CalculateFee(tt.chainTime, uTx))
+			fc := NewCalculator(feeTestsDefaultCfg, upgrades)
+			fc.Update(tt.chainTime)
+			require.Equal(t, tt.expected, fc.CalculateFee(uTx))
 		})
 	}
 }

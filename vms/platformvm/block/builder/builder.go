@@ -93,7 +93,7 @@ func New(
 	cfg := txExecutorBackend.Config
 	return &builder{
 		Mempool:           mempool,
-		feeCalculator:     fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator:     fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		txExecutorBackend: txExecutorBackend,
 		blkManager:        blkManager,
 		resetTimer:        make(chan struct{}, 1),
@@ -246,6 +246,7 @@ func (b *builder) PackBlockTxs(targetBlockSize int) ([]*txs.Tx, error) {
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", errMissingPreferredState, preferredID)
 	}
+	b.feeCalculator.Update(preferredState.GetTimestamp())
 
 	return packBlockTxs(
 		preferredID,
@@ -268,6 +269,7 @@ func buildBlock(
 	forceAdvanceTime bool,
 	parentState state.Chain,
 ) (block.Block, error) {
+	builder.feeCalculator.Update(timestamp)
 	blockTxs, err := packBlockTxs(
 		parentID,
 		parentState,

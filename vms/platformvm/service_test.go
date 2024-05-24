@@ -367,10 +367,9 @@ func TestGetBalance(t *testing.T) {
 	require := require.New(t)
 	service, _, _ := defaultService(t)
 
-	var (
-		feeCalc         = fee.NewStaticCalculator(service.vm.Config.StaticFeeConfig, service.vm.Config.UpgradeConfig)
-		createSubnetFee = feeCalc.CalculateFee(service.vm.clock.Time(), &txs.CreateSubnetTx{})
-	)
+	feeCalc := fee.NewCalculator(service.vm.Config.StaticFeeConfig, service.vm.Config.UpgradeConfig)
+	feeCalc.Update(service.vm.clock.Time())
+	createSubnetFee := feeCalc.CalculateFee(&txs.CreateSubnetTx{})
 
 	// Ensure GetStake is correct for each of the genesis validators
 	genesis, _ := defaultGenesis(t, service.vm.ctx.AVAXAssetID)

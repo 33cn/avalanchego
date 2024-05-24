@@ -61,7 +61,7 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -150,7 +150,7 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -241,7 +241,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -349,7 +349,7 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -424,7 +424,7 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -487,7 +487,7 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -563,7 +563,7 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 				ctx: &snow.Context{
 					Log: logging.NoLog{},
 				},
-				feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+				feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 			}
 			verifier := &verifier{
 				txExecutorBackend: &executor.Backend{
@@ -663,7 +663,7 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 				ctx: &snow.Context{
 					Log: logging.NoLog{},
 				},
-				feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+				feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 			}
 			verifier := &verifier{
 				txExecutorBackend: &executor.Backend{
@@ -747,7 +747,7 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -839,7 +839,7 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -900,7 +900,7 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 		ctx: &snow.Context{
 			Log: logging.NoLog{},
 		},
-		feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
@@ -957,7 +957,7 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
-			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+			feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -1005,7 +1005,7 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
-			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+			feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -1052,7 +1052,7 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
-			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+			feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
@@ -1100,7 +1100,7 @@ func TestVerifierVisitBanffAbortBlockUnexpectedParentState(t *testing.T) {
 			ctx: &snow.Context{
 				Log: logging.NoLog{},
 			},
-			feeCalculator: fee.NewStaticCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
+			feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		},
 	}
 
