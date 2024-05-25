@@ -156,6 +156,11 @@ func (t *Transitive) Put(ctx context.Context, nodeID ids.NodeID, requestID uint3
 		// abandon the request.
 		return t.GetFailed(ctx, nodeID, requestID)
 	}
+	t.Ctx.Log.Verbo("called PutBlock",
+		zap.Stringer("nodeID", nodeID),
+		zap.Stringer("blkID", blk.ID()),
+		zap.Uint64("height", blk.Height()),
+		zap.Uint32("requestID", requestID))
 
 	actualBlkID := blk.ID()
 	expectedBlkID, ok := t.blkReqs.Get(nodeID, requestID)
@@ -208,6 +213,11 @@ func (t *Transitive) GetFailed(ctx context.Context, nodeID ids.NodeID, requestID
 }
 
 func (t *Transitive) PullQuery(ctx context.Context, nodeID ids.NodeID, requestID uint32, blkID ids.ID) error {
+	t.Ctx.Log.Verbo("called PullQuery",
+		zap.Stringer("blkID", blkID),
+		zap.Stringer("nodeID", nodeID),
+		zap.Uint32("requestID", requestID))
+
 	t.sendChits(ctx, nodeID, requestID)
 
 	// Try to issue [blkID] to consensus.
@@ -263,6 +273,7 @@ func (t *Transitive) Chits(ctx context.Context, nodeID ids.NodeID, requestID uin
 
 	t.Ctx.Log.Verbo("called Chits for the block",
 		zap.Stringer("blkID", blkID),
+		zap.Stringer("acceptedID", acceptedID),
 		zap.Stringer("nodeID", nodeID),
 		zap.Uint32("requestID", requestID))
 
@@ -467,6 +478,9 @@ func (t *Transitive) sendChits(ctx context.Context, nodeID ids.NodeID, requestID
 // Build blocks if they have been requested and the number of processing blocks
 // is less than optimal.
 func (t *Transitive) buildBlocks(ctx context.Context) error {
+	t.Ctx.Log.Verbo("buildBlocks", zap.Int("pending", t.pendingBuildBlocks),
+		zap.Int("processing", t.Consensus.NumProcessing()),
+		zap.Error(t.errs.Err))
 	if err := t.errs.Err; err != nil {
 		return err
 	}
@@ -475,7 +489,7 @@ func (t *Transitive) buildBlocks(ctx context.Context) error {
 
 		blk, err := t.VM.BuildBlock(ctx)
 		if err != nil {
-			t.Ctx.Log.Debug("failed building block",
+			t.Ctx.Log.Debug("buildBlocks failed building block",
 				zap.Error(err),
 			)
 			t.numBuildsFailed.Inc()
@@ -486,7 +500,9 @@ func (t *Transitive) buildBlocks(ctx context.Context) error {
 		// a newly created block is expected to be processing. If this check
 		// fails, there is potentially an error in the VM this engine is running
 		if status := blk.Status(); status != choices.Processing {
-			t.Ctx.Log.Warn("attempting to issue block with unexpected status",
+			t.Ctx.Log.Warn("buildBlocks attempting to issue block with unexpected status",
+				zap.Uint64("height", blk.Height()),
+				zap.Stringer("blkID", blk.ID()),
 				zap.Stringer("expectedStatus", choices.Processing),
 				zap.Stringer("status", status),
 			)
@@ -496,22 +512,36 @@ func (t *Transitive) buildBlocks(ctx context.Context) error {
 		// Otherwise, the new block doesn't have the best chance of being confirmed.
 		parentID := blk.Parent()
 		if pref := t.Consensus.Preference(); parentID != pref {
-			t.Ctx.Log.Debug("built block with unexpected parent",
-				zap.Stringer("expectedParentID", pref),
+			t.Ctx.Log.Debug("buildBlocks with unexpected parent",
+				zap.Uint64("height", blk.Height()),
+				zap.Stringer("blkID", blk.ID()),
 				zap.Stringer("parentID", parentID),
+				zap.Stringer("expectedParentID", pref),
+				zap.Error(err),
 			)
 		}
 
 		added, err := t.issueWithAncestors(ctx, blk)
 		if err != nil {
+			t.Ctx.Log.Warn("buildBlocks issueWithAncestors",
+				zap.Uint64("height", blk.Height()),
+				zap.Stringer("blkID", blk.ID()),
+				zap.Stringer("parentID", parentID),
+				zap.Error(err))
 			return err
 		}
 
 		// issuing the block shouldn't have any missing dependencies
 		if added {
-			t.Ctx.Log.Verbo("successfully issued new block from the VM")
+			t.Ctx.Log.Verbo("buildBlocks successfully issued",
+				zap.Uint64("height", blk.Height()),
+				zap.Stringer("blkID", blk.ID()),
+				zap.Stringer("parentID", parentID))
 		} else {
-			t.Ctx.Log.Warn("built block with unissued ancestors")
+			t.Ctx.Log.Warn("buildBlocks with unissued ancestors",
+				zap.Uint64("height", blk.Height()),
+				zap.Stringer("blkID", blk.ID()),
+				zap.Stringer("parentID", parentID))
 		}
 	}
 	return nil
@@ -650,8 +680,10 @@ func (t *Transitive) issue(ctx context.Context, blk snowman.Block, push bool) er
 	parentID := blk.Parent()
 	if parent, err := t.GetBlock(ctx, parentID); err != nil || !(t.Consensus.Decided(parent) || t.Consensus.Processing(parentID)) {
 		t.Ctx.Log.Verbo("block waiting for parent to be issued",
+			zap.Uint64("height", blk.Height()),
 			zap.Stringer("blkID", blkID),
 			zap.Stringer("parentID", parentID),
+			zap.Error(err),
 		)
 		i.deps.Add(parentID)
 	}
@@ -687,15 +719,17 @@ func (t *Transitive) sendRequest(ctx context.Context, nodeID ids.NodeID, blkID i
 
 // send a pull query for this block ID
 func (t *Transitive) pullQuery(ctx context.Context, blkID ids.ID) {
-	t.Ctx.Log.Verbo("sampling from validators",
+	t.Ctx.Log.Verbo("pullQuery sampling from validators",
 		zap.Stringer("validators", t.Validators),
+		zap.Stringer("blkID", blkID),
 	)
 	// The validators we will query
 	vdrIDs, err := t.Validators.Sample(t.Params.K)
 	if err != nil {
-		t.Ctx.Log.Error("dropped query for block",
+		t.Ctx.Log.Debug("pullQuery dropped query for block",
 			zap.String("reason", "insufficient number of validators"),
 			zap.Stringer("blkID", blkID),
+			zap.Error(err),
 		)
 		return
 	}
@@ -716,16 +750,20 @@ func (t *Transitive) pullQuery(ctx context.Context, blkID ids.ID) {
 // If [push] is true, a push query will be used. Otherwise, a pull query will be
 // used.
 func (t *Transitive) sendQuery(ctx context.Context, blk snowman.Block, push bool) {
-	t.Ctx.Log.Verbo("sampling from validators",
+	t.Ctx.Log.Verbo("sendQuery sampling",
+		zap.Stringer("blkID", blk.ID()),
+		zap.Uint64("height", blk.Height()),
 		zap.Stringer("validators", t.Validators),
 	)
 
 	blkID := blk.ID()
 	vdrIDs, err := t.Validators.Sample(t.Params.K)
 	if err != nil {
-		t.Ctx.Log.Error("dropped query for block",
+		t.Ctx.Log.Debug("sendQuery dropped",
 			zap.String("reason", "insufficient number of validators"),
 			zap.Stringer("blkID", blkID),
+			zap.Uint64("height", blk.Height()),
+			zap.Error(err),
 		)
 		return
 	}
@@ -755,7 +793,10 @@ func (t *Transitive) deliver(ctx context.Context, blk snowman.Block, push bool) 
 	if t.Consensus.Decided(blk) || t.Consensus.Processing(blkID) {
 		return nil
 	}
-
+	t.Ctx.Log.Verbo("deliver block",
+		zap.Stringer("blkID", blk.ID()),
+		zap.Uint64("height", blk.Height()),
+		zap.Stringer("parent", blk.Parent()))
 	// we are no longer waiting on adding the block to consensus, so it is no
 	// longer pending
 	t.removeFromPending(blk)
@@ -767,6 +808,13 @@ func (t *Transitive) deliver(ctx context.Context, blk snowman.Block, push bool) 
 	if err != nil || !(parent.Status() == choices.Accepted || t.Consensus.Processing(parentID)) {
 		// if the parent isn't processing or the last accepted block, then this
 		// block is effectively rejected
+		t.Ctx.Log.Verbo("deliver reject",
+			zap.Stringer("blkID", blk.ID()),
+			zap.Uint64("height", blk.Height()),
+			zap.Error(err))
+		if err == nil {
+			_ = blk.Reject(ctx)
+		}
 		t.blocked.Abandon(ctx, blkID)
 		t.metrics.numBlocked.Set(float64(len(t.pending))) // Tracks performance statistics
 		t.metrics.numBlockers.Set(float64(t.blocked.Len()))
@@ -897,6 +945,7 @@ func (t *Transitive) addUnverifiedBlockToConsensus(ctx context.Context, blk snow
 	t.nonVerifiedCache.Evict(blkID)
 	t.metrics.numNonVerifieds.Set(float64(t.nonVerifieds.Len()))
 	t.Ctx.Log.Verbo("adding block to consensus",
+		zap.Uint64("height", blk.Height()),
 		zap.Stringer("blkID", blkID),
 	)
 	return true, t.Consensus.Add(ctx, &memoryBlock{
