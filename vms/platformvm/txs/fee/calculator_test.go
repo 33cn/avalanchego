@@ -682,19 +682,13 @@ func TestTxFees(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			maxComplexity := testBlockMaxComplexity
-			if tt.maxComplexityF != nil {
-				maxComplexity = tt.maxComplexityF()
-			}
-
 			uTx, sTx := tt.unsignedAndSignedTx(t)
 
-			var fc *Calculator
-			if !upgrades.IsEActivated(tt.chainTime) {
-				fc = NewStaticCalculator(feeTestsDefaultCfg, upgrades, tt.chainTime)
-			} else {
-				fc = NewDynamicCalculator(feeTestsDefaultCfg, fees.NewManager(testFeeRates), maxComplexity)
-			}
+			fc := NewCalculator(feeTestsDefaultCfg, upgrades)
+
+			isEActive := upgrades.IsEActivated(tt.chainTime)
+			feeCfg := GetDynamicConfig(isEActive)
+			fc.Update(tt.chainTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 			var creds []verify.Verifiable
 			if sTx != nil {

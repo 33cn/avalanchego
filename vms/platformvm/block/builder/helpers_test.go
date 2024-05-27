@@ -237,6 +237,18 @@ func newEnvironment(t *testing.T, f fork) *environment { //nolint:unparam
 	return res
 }
 
+// helper to create either a static or a dynamic fee calculator, depending on the active upgrade
+func pickFeeCalculator(cfg *config.Config, time time.Time) *fee.Calculator {
+	var (
+		isEActive = cfg.UpgradeConfig.IsEActivated(time)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+
+	feeCalculator := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
+	feeCalculator.Update(time, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	return feeCalculator
+}
+
 func addSubnet(t *testing.T, env *environment) {
 	require := require.New(t)
 
@@ -264,7 +276,7 @@ func addSubnet(t *testing.T, env *environment) {
 	stateDiff, err := state.NewDiff(genesisID, env.blkManager)
 	require.NoError(err)
 
-	feeCalculator := config.PickFeeCalculator(env.backend.Config, stateDiff.GetTimestamp())
+	feeCalculator := pickFeeCalculator(env.config, stateDiff.GetTimestamp())
 	executor := txexecutor.StandardTxExecutor{
 		Backend:       &env.backend,
 		State:         stateDiff,

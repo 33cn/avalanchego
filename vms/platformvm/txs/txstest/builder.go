@@ -37,9 +37,10 @@ func NewBuilder(
 }
 
 type Builder struct {
-	ctx   *snow.Context
-	cfg   *config.Config
-	state state.State
+	ctx           *snow.Context
+	cfg           *config.Config
+	state         state.State
+	feeCalculator *fee.Calculator
 }
 
 func (b *Builder) NewImportTx(
@@ -49,12 +50,18 @@ func (b *Builder) NewImportTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewImportTx(
 		chainID,
 		to,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -71,12 +78,17 @@ func (b *Builder) NewExportTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewExportTx(
 		chainID,
 		outputs,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -96,7 +108,12 @@ func (b *Builder) NewCreateChainTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewCreateChainTx(
 		subnetID,
@@ -104,7 +121,7 @@ func (b *Builder) NewCreateChainTx(
 		vmID,
 		fxIDs,
 		chainName,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -120,11 +137,16 @@ func (b *Builder) NewCreateSubnetTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewCreateSubnetTx(
 		owner,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -153,7 +175,12 @@ func (b *Builder) NewTransformSubnetTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewTransformSubnetTx(
 		subnetID,
@@ -170,7 +197,7 @@ func (b *Builder) NewTransformSubnetTx(
 		minDelegatorStake,
 		maxValidatorWeightFactor,
 		uptimeRequirement,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -188,13 +215,18 @@ func (b *Builder) NewAddValidatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewAddValidatorTx(
 		vdr,
 		rewardsOwner,
 		shares,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -215,7 +247,12 @@ func (b *Builder) NewAddPermissionlessValidatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewAddPermissionlessValidatorTx(
 		vdr,
@@ -224,7 +261,7 @@ func (b *Builder) NewAddPermissionlessValidatorTx(
 		validationRewardsOwner,
 		delegationRewardsOwner,
 		shares,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -241,12 +278,17 @@ func (b *Builder) NewAddDelegatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewAddDelegatorTx(
 		vdr,
 		rewardsOwner,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -264,13 +306,18 @@ func (b *Builder) NewAddPermissionlessDelegatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewAddPermissionlessDelegatorTx(
 		vdr,
 		assetID,
 		rewardsOwner,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -286,11 +333,16 @@ func (b *Builder) NewAddSubnetValidatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewAddSubnetValidatorTx(
 		vdr,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -307,12 +359,17 @@ func (b *Builder) NewRemoveSubnetValidatorTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewRemoveSubnetValidatorTx(
 		nodeID,
 		subnetID,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -329,12 +386,17 @@ func (b *Builder) NewTransferSubnetOwnershipTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewTransferSubnetOwnershipTx(
 		subnetID,
 		owner,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -350,11 +412,16 @@ func (b *Builder) NewBaseTx(
 	options ...common.Option,
 ) (*txs.Tx, error) {
 	pBuilder, pSigner := b.builders(keys)
-	feeCalc := b.feeCalculator()
+	var (
+		blkTime   = b.state.GetTimestamp()
+		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 
 	utx, err := pBuilder.NewBaseTx(
 		outputs,
-		feeCalc,
+		b.feeCalculator,
 		options...,
 	)
 	if err != nil {
@@ -375,9 +442,4 @@ func (b *Builder) builders(keys []*secp256k1.PrivateKey) (builder.Builder, walle
 	)
 
 	return builder, signer
-}
-
-func (b *Builder) feeCalculator() *fee.Calculator {
-	chainTime := b.state.GetTimestamp()
-	return config.PickFeeCalculator(b.cfg, chainTime)
 }

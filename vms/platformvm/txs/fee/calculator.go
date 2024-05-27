@@ -26,35 +26,30 @@ var (
 	errFailedComplexityCumulation = errors.New("failed cumulating complexity")
 )
 
-func NewStaticCalculator(config StaticConfig, upgradeTimes upgrade.Config, chainTime time.Time) *Calculator {
+func NewCalculator(config StaticConfig, upgradeTimes upgrade.Config) *Calculator {
 	return &Calculator{
 		c: &calculator{
 			upgrades:  upgradeTimes,
 			staticCfg: config,
-			time:      chainTime,
-		},
-	}
-}
-
-// NewDynamicCalculator must be used post E upgrade activation
-func NewDynamicCalculator(
-	cfg StaticConfig,
-	feeManager *fees.Manager,
-	blockMaxComplexity fees.Dimensions,
-) *Calculator {
-	return &Calculator{
-		c: &calculator{
-			isEActive:          true,
-			staticCfg:          cfg,
-			feeManager:         feeManager,
-			blockMaxComplexity: blockMaxComplexity,
-			// credentials are set when CalculateFee is called
+			// other attributes are setup upon Update call
 		},
 	}
 }
 
 type Calculator struct {
 	c *calculator
+}
+
+func (c *Calculator) Update(t time.Time, feeRates, blkMaxComplexities fees.Dimensions) {
+	var (
+		isEActive = c.c.upgrades.IsEActivated(t)
+		feesMan   = fees.NewManager(feeRates)
+	)
+
+	c.c.isEActive = isEActive
+	c.c.time = t
+	c.c.feeManager = feesMan
+	c.c.blockMaxComplexity = blkMaxComplexities
 }
 
 func (c *Calculator) GetFee() uint64 {

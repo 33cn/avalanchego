@@ -354,6 +354,18 @@ func defaultVM(t *testing.T, f fork) (*VM, *txstest.Builder, database.Database, 
 	return vm, builder, db, msm
 }
 
+// helper to create either a static or a dynamic fee calculator, depending on the active upgrade
+func pickFeeCalculator(cfg *config.Config, time time.Time) *fee.Calculator {
+	var (
+		isEActive = cfg.UpgradeConfig.IsEActivated(time)
+		feeCfg    = fee.GetDynamicConfig(isEActive)
+	)
+
+	feeCalculator := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
+	feeCalculator.Update(time, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	return feeCalculator
+}
+
 // Ensure genesis state is parsed from bytes and stored correctly
 func TestGenesis(t *testing.T) {
 	require := require.New(t)
@@ -393,7 +405,7 @@ func TestGenesis(t *testing.T) {
 
 			// we use the first key to fund a subnet creation in [defaultGenesis].
 			// As such we need to account for the subnet creation fee
-			feeCalc := config.PickFeeCalculator(&vm.Config, vm.state.GetTimestamp())
+			feeCalc := pickFeeCalculator(&vm.Config, vm.state.GetTimestamp())
 			fee, err := feeCalc.ComputeFee(testSubnet1.Unsigned, testSubnet1.Creds)
 			require.NoError(err)
 			require.Equal(uint64(utxo.Amount)-fee, out.Amount())
@@ -2375,7 +2387,7 @@ func TestBaseTx(t *testing.T) {
 	}
 	require.Equal(totalOutputAmt, key0OutputAmt+key1OutputAmt+changeAddrOutputAmt)
 
-	feeCalc := config.PickFeeCalculator(&vm.Config, vm.state.GetTimestamp())
+	feeCalc := pickFeeCalculator(&vm.Config, vm.state.GetTimestamp())
 	fee, err := feeCalc.ComputeFee(baseTx.Unsigned, baseTx.Creds)
 	require.NoError(err)
 	require.Equal(fee, totalInputAmt-totalOutputAmt)

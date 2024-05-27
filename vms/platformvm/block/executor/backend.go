@@ -12,6 +12,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/set"
 	"github.com/ava-labs/avalanchego/vms/platformvm/block"
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/mempool"
 )
 
@@ -34,6 +35,8 @@ type backend struct {
 	state        state.State
 
 	ctx *snow.Context
+
+	feeCalculator *fee.Calculator
 }
 
 func (b *backend) GetState(blkID ids.ID) (state.Chain, bool) {

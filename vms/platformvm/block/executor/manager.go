@@ -10,11 +10,11 @@ import (
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
 	"github.com/ava-labs/avalanchego/utils/set"
 	"github.com/ava-labs/avalanchego/vms/platformvm/block"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
 	"github.com/ava-labs/avalanchego/vms/platformvm/metrics"
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/mempool"
 	"github.com/ava-labs/avalanchego/vms/platformvm/validators"
 )
@@ -55,12 +55,14 @@ func NewManager(
 	validatorManager validators.Manager,
 ) Manager {
 	lastAccepted := s.GetLastAccepted()
+	cfg := txExecutorBackend.Config
 	backend := &backend{
-		Mempool:      mempool,
-		lastAccepted: lastAccepted,
-		state:        s,
-		ctx:          txExecutorBackend.Ctx,
-		blkIDToState: map[ids.ID]*blockState{},
+		Mempool:       mempool,
+		lastAccepted:  lastAccepted,
+		state:         s,
+		ctx:           txExecutorBackend.Ctx,
+		blkIDToState:  map[ids.ID]*blockState{},
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 
 	return &manager{
@@ -143,11 +145,13 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return err
 	}
 
-	feeCalculator := config.PickFeeCalculator(m.txExecutorBackend.Config, nextBlkTime)
+	isEActive := m.txExecutorBackend.Config.UpgradeConfig.IsEActivated(nextBlkTime)
+	feeCfg := fee.GetDynamicConfig(isEActive)
+	m.feeCalculator.Update(nextBlkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
 	return tx.Unsigned.Visit(&executor.StandardTxExecutor{
 		Backend:       m.txExecutorBackend,
 		State:         stateDiff,
-		FeeCalculator: feeCalculator,
+		FeeCalculator: m.feeCalculator,
 		Tx:            tx,
 	})
 }

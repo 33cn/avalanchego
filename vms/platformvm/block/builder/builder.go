@@ -19,10 +19,10 @@ import (
 	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 	"github.com/ava-labs/avalanchego/utils/units"
 	"github.com/ava-labs/avalanchego/vms/platformvm/block"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
 	"github.com/ava-labs/avalanchego/vms/platformvm/status"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/mempool"
 
 	blockexecutor "github.com/ava-labs/avalanchego/vms/platformvm/block/executor"
@@ -74,6 +74,7 @@ type Builder interface {
 type builder struct {
 	mempool.Mempool
 
+	feeCalculator     *fee.Calculator
 	txExecutorBackend *txexecutor.Backend
 	blkManager        blockexecutor.Manager
 
@@ -89,8 +90,10 @@ func New(
 	txExecutorBackend *txexecutor.Backend,
 	blkManager blockexecutor.Manager,
 ) Builder {
+	cfg := txExecutorBackend.Config
 	return &builder{
 		Mempool:           mempool,
+		feeCalculator:     fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 		txExecutorBackend: txExecutorBackend,
 		blkManager:        blkManager,
 		resetTimer:        make(chan struct{}, 1),
@@ -244,9 +247,15 @@ func (b *builder) PackBlockTxs(targetBlockSize int) ([]*txs.Tx, error) {
 		return nil, fmt.Errorf("%w: %s", errMissingPreferredState, preferredID)
 	}
 
+	blkTime := preferredState.GetTimestamp()
+	isEActive := b.txExecutorBackend.Config.UpgradeConfig.IsEActivated(blkTime)
+	feeCfg := fee.GetDynamicConfig(isEActive)
+	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+
 	return packBlockTxs(
 		preferredID,
 		preferredState,
+		b.feeCalculator,
 		b.Mempool,
 		b.txExecutorBackend,
 		b.blkManager,
@@ -264,9 +273,14 @@ func buildBlock(
 	forceAdvanceTime bool,
 	parentState state.Chain,
 ) (block.Block, error) {
+	isEActive := builder.txExecutorBackend.Config.UpgradeConfig.IsEActivated(timestamp)
+	feeCfg := fee.GetDynamicConfig(isEActive)
+	builder.feeCalculator.Update(timestamp, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+
 	blockTxs, err := packBlockTxs(
 		parentID,
 		parentState,
+		builder.feeCalculator,
 		builder.Mempool,
 		builder.txExecutorBackend,
 		builder.blkManager,
@@ -317,6 +331,7 @@ func buildBlock(
 func packBlockTxs(
 	parentID ids.ID,
 	parentState state.Chain,
+	feeCalculator *fee.Calculator,
 	mempool mempool.Mempool,
 	backend *txexecutor.Backend,
 	manager blockexecutor.Manager,
@@ -333,9 +348,8 @@ func packBlockTxs(
 	}
 
 	var (
-		blockTxs      []*txs.Tx
-		inputs        set.Set[ids.ID]
-		feeCalculator = config.PickFeeCalculator(backend.Config, timestamp)
+		blockTxs []*txs.Tx
+		inputs   set.Set[ids.ID]
 	)
 
 	for {
