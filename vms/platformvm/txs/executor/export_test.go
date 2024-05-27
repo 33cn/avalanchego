@@ -13,7 +13,6 @@ import (
 	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
@@ -73,8 +72,7 @@ func TestNewExportTx(t *testing.T) {
 
 			stateDiff.SetTimestamp(tt.timestamp)
 
-			feeCalculator := fee.NewCalculator(env.backend.Config.StaticFeeConfig, env.backend.Config.UpgradeConfig)
-			feeCalculator.Update(stateDiff.GetTimestamp())
+			feeCalculator := pickFeeCalculator(env.config, stateDiff.GetTimestamp())
 			verifier := StandardTxExecutor{
 				Backend:       &env.backend,
 				FeeCalculator: feeCalculator,

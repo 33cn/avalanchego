@@ -18,7 +18,6 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
 	"github.com/ava-labs/avalanchego/vms/platformvm/status"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
@@ -263,8 +262,7 @@ func TestProposalTxExecuteAddDelegator(t *testing.T) {
 			onAbortState, err := state.NewDiff(lastAcceptedID, env)
 			require.NoError(err)
 
-			feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-			feeCalculator.Update(onCommitState.GetTimestamp())
+			feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 			executor := ProposalTxExecutor{
 				OnCommitState: onCommitState,
 				OnAbortState:  onAbortState,
@@ -309,8 +307,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -347,8 +344,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -403,8 +399,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -456,8 +451,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -492,8 +486,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -528,8 +521,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -566,8 +558,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -634,8 +625,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -680,8 +670,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -720,8 +709,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -770,8 +758,7 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -817,8 +804,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -856,8 +842,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -909,8 +894,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,
@@ -954,8 +938,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := fee.NewCalculator(env.config.StaticFeeConfig, env.config.UpgradeConfig)
-		feeCalculator.Update(onCommitState.GetTimestamp())
+		feeCalculator := pickFeeCalculator(env.config, onCommitState.GetTimestamp())
 		executor := ProposalTxExecutor{
 			OnCommitState: onCommitState,
 			OnAbortState:  onAbortState,

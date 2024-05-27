@@ -250,6 +250,13 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f fork) *environment 
 	return res
 }
 
+// helper to create either a static or a dynamic fee calculator, depending on the active upgrade
+func pickFeeCalculator(cfg *config.Config, time time.Time) *fee.Calculator {
+	feeCalculator := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
+	feeCalculator.Update(time)
+	return feeCalculator
+}
+
 func addSubnet(env *environment) {
 	// Create a subnet
 	var err error
@@ -279,8 +286,7 @@ func addSubnet(env *environment) {
 		panic(err)
 	}
 
-	feeCalculator := fee.NewCalculator(env.backend.Config.StaticFeeConfig, env.backend.Config.UpgradeConfig)
-	feeCalculator.Update(stateDiff.GetTimestamp())
+	feeCalculator := pickFeeCalculator(env.backend.Config, stateDiff.GetTimestamp())
 	executor := executor.StandardTxExecutor{
 		Backend:       env.backend,
 		State:         stateDiff,
