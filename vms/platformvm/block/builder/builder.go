@@ -248,9 +248,7 @@ func (b *builder) PackBlockTxs(targetBlockSize int) ([]*txs.Tx, error) {
 	}
 
 	blkTime := preferredState.GetTimestamp()
-	isEActive := b.txExecutorBackend.Config.UpgradeConfig.IsEActivated(blkTime)
-	feeCfg := fee.GetDynamicConfig(isEActive)
-	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	b.feeCalculator.Update(blkTime)
 
 	return packBlockTxs(
 		preferredID,
@@ -273,10 +271,7 @@ func buildBlock(
 	forceAdvanceTime bool,
 	parentState state.Chain,
 ) (block.Block, error) {
-	isEActive := builder.txExecutorBackend.Config.UpgradeConfig.IsEActivated(timestamp)
-	feeCfg := fee.GetDynamicConfig(isEActive)
-	builder.feeCalculator.Update(timestamp, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
-
+	builder.feeCalculator.Update(timestamp)
 	blockTxs, err := packBlockTxs(
 		parentID,
 		parentState,

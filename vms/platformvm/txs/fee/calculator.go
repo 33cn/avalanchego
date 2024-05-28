@@ -40,16 +40,17 @@ type Calculator struct {
 	c *calculator
 }
 
-func (c *Calculator) Update(t time.Time, feeRates, blkMaxComplexities fees.Dimensions) {
+func (c *Calculator) Update(t time.Time) {
 	var (
 		isEActive = c.c.upgrades.IsEActivated(t)
-		feesMan   = fees.NewManager(feeRates)
+		feeCfg    = GetDynamicConfig(isEActive)
+		feesMan   = fees.NewManager(feeCfg.FeeRate)
 	)
 
 	c.c.isEActive = isEActive
 	c.c.time = t
 	c.c.feeManager = feesMan
-	c.c.blockMaxComplexity = blkMaxComplexities
+	c.c.blockMaxComplexity = feeCfg.BlockMaxComplexity
 }
 
 func (c *Calculator) GetFee() uint64 {

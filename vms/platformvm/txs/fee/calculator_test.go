@@ -699,10 +699,7 @@ func TestTxFees(t *testing.T) {
 			uTx, sTx := tt.unsignedAndSignedTx(t)
 
 			fc := NewCalculator(feeTestsDefaultCfg, upgrades)
-
-			isEActive := upgrades.IsEActivated(tt.chainTime)
-			feeCfg := GetDynamicConfig(isEActive)
-			fc.Update(tt.chainTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+			fc.Update(tt.chainTime)
 
 			var creds []verify.Verifiable
 			if sTx != nil {

@@ -239,13 +239,8 @@ func newEnvironment(t *testing.T, f fork) *environment { //nolint:unparam
 
 // helper to create either a static or a dynamic fee calculator, depending on the active upgrade
 func pickFeeCalculator(cfg *config.Config, time time.Time) *fee.Calculator {
-	var (
-		isEActive = cfg.UpgradeConfig.IsEActivated(time)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-
 	feeCalculator := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
-	feeCalculator.Update(time, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	feeCalculator.Update(time)
 	return feeCalculator
 }
 

@@ -381,10 +381,6 @@ func (b *Builder) builders(keys []*secp256k1.PrivateKey) (builder.Builder, walle
 }
 
 func (b *Builder) refreshFeeCalculator() {
-	var (
-		blkTime   = b.state.GetTimestamp()
-		isEActive = b.cfg.UpgradeConfig.IsEActivated(blkTime)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	b.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	blkTime := b.state.GetTimestamp()
+	b.feeCalculator.Update(blkTime)
 }

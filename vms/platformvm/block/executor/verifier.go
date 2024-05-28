@@ -16,7 +16,6 @@ import (
 	"github.com/ava-labs/avalanchego/vms/platformvm/status"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/fee"
 )
 
 var (
@@ -68,11 +67,7 @@ func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		return err
 	}
 
-	var (
-		isEActive = v.txExecutorBackend.Config.UpgradeConfig.IsEActivated(nextChainTime)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	v.feeCalculator.Update(nextChainTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	v.feeCalculator.Update(nextChainTime)
 	inputs, atomicRequests, onAcceptFunc, err := v.processStandardTxs(b.Transactions, onDecisionState, b.Parent())
 	if err != nil {
 		return err
@@ -126,12 +121,8 @@ func (v *verifier) BanffStandardBlock(b *block.BanffStandardBlock) error {
 		return errBanffStandardBlockWithoutChanges
 	}
 
-	var (
-		blkTime   = b.Timestamp()
-		isEActive = v.txExecutorBackend.Config.UpgradeConfig.IsEActivated(blkTime)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	v.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	blkTime := b.Timestamp()
+	v.feeCalculator.Update(blkTime)
 	return v.standardBlock(&b.ApricotStandardBlock, onAcceptState)
 }
 
@@ -164,12 +155,8 @@ func (v *verifier) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
 		return err
 	}
 
-	var (
-		blkTime   = onCommitState.GetTimestamp()
-		isEActive = v.txExecutorBackend.Config.UpgradeConfig.IsEActivated(blkTime)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	v.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	blkTime := onCommitState.GetTimestamp()
+	v.feeCalculator.Update(blkTime)
 	return v.proposalBlock(b, nil, onCommitState, onAbortState, nil, nil, nil)
 }
 
@@ -184,12 +171,8 @@ func (v *verifier) ApricotStandardBlock(b *block.ApricotStandardBlock) error {
 		return err
 	}
 
-	var (
-		blkTime   = onAcceptState.GetTimestamp()
-		isEActive = v.txExecutorBackend.Config.UpgradeConfig.IsEActivated(blkTime)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	v.feeCalculator.Update(blkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	blkTime := onAcceptState.GetTimestamp()
+	v.feeCalculator.Update(blkTime)
 	return v.standardBlock(b, onAcceptState)
 }
 
@@ -212,11 +195,7 @@ func (v *verifier) ApricotAtomicBlock(b *block.ApricotAtomicBlock) error {
 		)
 	}
 
-	var (
-		isEActive = v.txExecutorBackend.Config.UpgradeConfig.IsEActivated(currentTimestamp)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-	)
-	v.feeCalculator.Update(currentTimestamp, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	v.feeCalculator.Update(currentTimestamp)
 	atomicExecutor := executor.AtomicTxExecutor{
 		Backend:       v.txExecutorBackend,
 		FeeCalculator: v.feeCalculator,

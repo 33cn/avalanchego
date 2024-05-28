@@ -145,9 +145,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return err
 	}
 
-	isEActive := m.txExecutorBackend.Config.UpgradeConfig.IsEActivated(nextBlkTime)
-	feeCfg := fee.GetDynamicConfig(isEActive)
-	m.feeCalculator.Update(nextBlkTime, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	m.feeCalculator.Update(nextBlkTime)
 	return tx.Unsigned.Visit(&executor.StandardTxExecutor{
 		Backend:       m.txExecutorBackend,
 		State:         stateDiff,

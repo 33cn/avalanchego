@@ -273,9 +273,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f fork) *environment 
 // helper to create either a static or a dynamic fee calculator, depending on the active upgrade
 func pickFeeCalculator(cfg *config.Config, time time.Time) *fee.Calculator {
 	feeCalculator := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
-	isEActive := cfg.UpgradeConfig.IsEActivated(time)
-	feeCfg := fee.GetDynamicConfig(isEActive)
-	feeCalculator.Update(time, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	feeCalculator.Update(time)
 	return feeCalculator
 }
 

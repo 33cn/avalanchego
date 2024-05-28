@@ -18,12 +18,8 @@ func newContext(
 	cfg *config.Config,
 	timestamp time.Time,
 ) *builder.Context {
-	var (
-		isEActive = cfg.UpgradeConfig.IsEActivated(timestamp)
-		feeCfg    = fee.GetDynamicConfig(isEActive)
-		feeCalc   = fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
-	)
-	feeCalc.Update(timestamp, feeCfg.FeeRate, feeCfg.BlockMaxComplexity)
+	feeCalc := fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig)
+	feeCalc.Update(timestamp)
 
 	var (
 		createSubnetFee, _ = feeCalc.ComputeFee(&txs.CreateSubnetTx{}, nil)
