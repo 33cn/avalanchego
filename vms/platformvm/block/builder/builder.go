@@ -246,9 +246,7 @@ func (b *builder) PackBlockTxs(targetBlockSize int) ([]*txs.Tx, error) {
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", errMissingPreferredState, preferredID)
 	}
-
-	blkTime := preferredState.GetTimestamp()
-	b.feeCalculator.Update(blkTime)
+	b.feeCalculator.Update(preferredState.GetTimestamp())
 
 	return packBlockTxs(
 		preferredID,
