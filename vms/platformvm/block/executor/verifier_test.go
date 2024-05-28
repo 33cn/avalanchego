@@ -424,8 +424,12 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentOnAcceptState := state.NewMockDiff(ctrl)
 	timestamp := time.Now()
+
+	s.EXPECT().GetTimestamp().Return(timestamp)
+
 	// One call for each of onCommitState and onAbortState.
 	parentOnAcceptState.EXPECT().GetTimestamp().Return(timestamp).Times(2)
+
 	cfg := &config.Config{
 		UpgradeConfig: upgrade.Config{
 			BanffTime: mockable.MaxTime, // banff is not activated
@@ -522,6 +526,8 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -575,7 +581,6 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 	apricotBlk.Tx.Unsigned = blkTx
 
 	// Set expectations for dependencies.
-	timestamp := time.Now()
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 	parentStatelessBlk.EXPECT().Parent().Return(grandparentID).Times(1)
 	mempool.EXPECT().Remove([]*txs.Tx{apricotBlk.Tx}).Times(1)
@@ -616,6 +621,8 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -683,7 +690,6 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	apricotBlk.Transactions[0].Unsigned = blkTx
 
 	// Set expectations for dependencies.
-	timestamp := time.Now()
 	parentState.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 	mempool.EXPECT().Remove(apricotBlk.Txs()).Times(1)
@@ -720,6 +726,8 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -757,7 +765,6 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 	require.NoError(err)
 
 	// Set expectations for dependencies.
-	timestamp := time.Now()
 	gomock.InOrder(
 		parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1),
 		parentOnCommitState.EXPECT().GetTimestamp().Return(timestamp).Times(1),
@@ -795,6 +802,8 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -832,7 +841,6 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 	require.NoError(err)
 
 	// Set expectations for dependencies.
-	timestamp := time.Now()
 	gomock.InOrder(
 		parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1),
 		parentOnAbortState.EXPECT().GetTimestamp().Return(timestamp).Times(1),
@@ -867,6 +875,8 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp).Times(2)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{},
 		Mempool:      mempool,
@@ -888,7 +898,6 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 	require.NoError(err)
 
 	// Set expectations for dependencies.
-	s.EXPECT().GetTimestamp().Return(time.Now()).Times(1)
 	s.EXPECT().GetStatelessBlock(parentID).Return(nil, database.ErrNotFound).Times(1)
 
 	// Verify the block.
@@ -943,6 +952,8 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 				},
 			}
 
+			parentTime := defaultGenesisTime
+			s.EXPECT().GetTimestamp().Return(parentTime).Times(4)
 			backend := &backend{
 				blkIDToState: make(map[ids.ID]*blockState),
 				Mempool:      mempool,
@@ -966,9 +977,7 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 			require.NoError(err)
 
 			// setup parent state
-			parentTime := defaultGenesisTime
 			s.EXPECT().GetLastAccepted().Return(parentID).Times(3)
-			s.EXPECT().GetTimestamp().Return(parentTime).Times(3)
 
 			onDecisionState, err := state.NewDiff(parentID, backend)
 			require.NoError(err)
@@ -1043,6 +1052,8 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 				},
 			}
 
+			parentTime := defaultGenesisTime
+			s.EXPECT().GetTimestamp().Return(parentTime).Times(4)
 			backend := &backend{
 				blkIDToState: make(map[ids.ID]*blockState),
 				Mempool:      mempool,
@@ -1066,9 +1077,7 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 			require.NoError(err)
 
 			// setup parent state
-			parentTime := defaultGenesisTime
 			s.EXPECT().GetLastAccepted().Return(parentID).Times(3)
-			s.EXPECT().GetTimestamp().Return(parentTime).Times(3)
 
 			onDecisionState, err := state.NewDiff(parentID, backend)
 			require.NoError(err)
@@ -1120,6 +1129,8 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			grandParentID: {
@@ -1188,7 +1199,6 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 	blk.Transactions[0].Unsigned = blkTx
 
 	// Set expectations for dependencies.
-	timestamp := time.Now()
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 	parentState.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 	parentStatelessBlk.EXPECT().Parent().Return(grandParentID).Times(1)
@@ -1214,6 +1224,8 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 		},
 	}
 
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -1275,6 +1287,9 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 			BanffTime: time.Time{}, // banff is activated
 		},
 	}
+
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	backend := &backend{
 		blkIDToState: map[ids.ID]*blockState{
 			parentID: {
@@ -1332,6 +1347,9 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 			BanffTime: mockable.MaxTime, // banff is not activated
 		},
 	}
+
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: cfg,
@@ -1379,6 +1397,8 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 			BanffTime: time.Time{}, // banff is activated
 		},
 	}
+
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: cfg,
@@ -1427,6 +1447,9 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 			BanffTime: mockable.MaxTime, // banff is not activated
 		},
 	}
+
+	timestamp := time.Now()
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: cfg,
@@ -1474,6 +1497,8 @@ func TestVerifierVisitBanffAbortBlockUnexpectedParentState(t *testing.T) {
 			BanffTime: time.Time{}, // banff is activated
 		},
 	}
+
+	s.EXPECT().GetTimestamp().Return(timestamp)
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: cfg,

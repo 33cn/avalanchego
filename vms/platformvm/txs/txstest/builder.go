@@ -30,9 +30,10 @@ func NewBuilder(
 	state state.State,
 ) *Builder {
 	return &Builder{
-		ctx:   ctx,
-		cfg:   cfg,
-		state: state,
+		ctx:           ctx,
+		cfg:           cfg,
+		state:         state,
+		feeCalculator: fee.NewCalculator(cfg.StaticFeeConfig, cfg.UpgradeConfig),
 	}
 }
 

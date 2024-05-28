@@ -143,6 +143,7 @@ func TestBlockOptions(t *testing.T) {
 			name: "apricot proposal block; commit preferred",
 			blkF: func(ctrl *gomock.Controller) *Block {
 				state := state.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -172,6 +173,7 @@ func TestBlockOptions(t *testing.T) {
 			name: "banff proposal block; invalid proposal tx",
 			blkF: func(ctrl *gomock.Controller) *Block {
 				state := state.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -210,6 +212,7 @@ func TestBlockOptions(t *testing.T) {
 
 				state := state.NewMockState(ctrl)
 				state.EXPECT().GetTx(stakerTxID).Return(nil, status.Unknown, database.ErrNotFound)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -250,6 +253,7 @@ func TestBlockOptions(t *testing.T) {
 
 				state := state.NewMockState(ctrl)
 				state.EXPECT().GetTx(stakerTxID).Return(nil, status.Unknown, database.ErrClosed)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -293,6 +297,7 @@ func TestBlockOptions(t *testing.T) {
 
 				state := state.NewMockState(ctrl)
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -346,6 +351,7 @@ func TestBlockOptions(t *testing.T) {
 				state := state.NewMockState(ctrl)
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
 				state.EXPECT().GetCurrentValidator(constants.PrimaryNetworkID, nodeID).Return(nil, database.ErrNotFound)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -403,6 +409,7 @@ func TestBlockOptions(t *testing.T) {
 				state := state.NewMockState(ctrl)
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
 				state.EXPECT().GetCurrentValidator(constants.PrimaryNetworkID, nodeID).Return(staker, nil)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(0.0, database.ErrNotFound)
@@ -462,6 +469,7 @@ func TestBlockOptions(t *testing.T) {
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
 				state.EXPECT().GetCurrentValidator(constants.PrimaryNetworkID, nodeID).Return(staker, nil)
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(nil, database.ErrNotFound)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 
@@ -525,6 +533,7 @@ func TestBlockOptions(t *testing.T) {
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
 				state.EXPECT().GetCurrentValidator(constants.PrimaryNetworkID, nodeID).Return(staker, nil)
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(transformSubnetTx, nil)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(.5, nil)
@@ -589,6 +598,7 @@ func TestBlockOptions(t *testing.T) {
 				state.EXPECT().GetTx(stakerTxID).Return(stakerTx, status.Committed, nil)
 				state.EXPECT().GetCurrentValidator(constants.PrimaryNetworkID, nodeID).Return(staker, nil)
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(transformSubnetTx, nil)
+				state.EXPECT().GetTimestamp().Return(time.Now())
 
 				uptimes := uptime.NewMockCalculator(ctrl)
 				uptimes.EXPECT().CalculateUptimePercentFrom(nodeID, constants.PrimaryNetworkID, primaryNetworkValidatorStartTime).Return(.5, nil)

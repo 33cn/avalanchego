@@ -1670,6 +1670,7 @@ func TestStandardExecutorRemoveSubnetValidatorTx(t *testing.T) {
 				// Setting the subnet ID to the Primary Network ID makes the tx fail syntactic verification
 				env.tx.Unsigned.(*txs.RemoveSubnetValidatorTx).Subnet = constants.PrimaryNetworkID
 				env.state = state.NewMockDiff(ctrl)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
 				feeCalculator := pickFeeCalculator(cfg, env.state.GetTimestamp())
@@ -1727,7 +1728,7 @@ func TestStandardExecutorRemoveSubnetValidatorTx(t *testing.T) {
 				staker.Priority = txs.SubnetPermissionlessValidatorCurrentPriority
 
 				// Set dependency expectations.
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 				env.state.EXPECT().GetCurrentValidator(env.unsignedTx.Subnet, env.unsignedTx.NodeID).Return(&staker, nil).Times(1)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
@@ -1756,7 +1757,7 @@ func TestStandardExecutorRemoveSubnetValidatorTx(t *testing.T) {
 				// Remove credentials
 				env.tx.Creds = nil
 				env.state = state.NewMockDiff(ctrl)
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 				env.state.EXPECT().GetCurrentValidator(env.unsignedTx.Subnet, env.unsignedTx.NodeID).Return(env.staker, nil)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
@@ -2006,6 +2007,7 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				// Setting the tx to nil makes the tx fail syntactic verification
 				env.tx.Unsigned = (*txs.TransformSubnetTx)(nil)
 				env.state = state.NewMockDiff(ctrl)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
 				feeCalculator := pickFeeCalculator(cfg, env.state.GetTimestamp())
@@ -2032,7 +2034,7 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				env := newValidTransformSubnetTxVerifyEnv(t, ctrl)
 				env.unsignedTx.MaxStakeDuration = math.MaxUint32
 				env.state = state.NewMockDiff(ctrl)
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
 				feeCalculator := pickFeeCalculator(cfg, env.state.GetTimestamp())
@@ -2060,7 +2062,7 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				// Remove credentials
 				env.tx.Creds = nil
 				env.state = state.NewMockDiff(ctrl)
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 
 				cfg := defaultTestConfig(t, durango, env.latestForkTime)
 				cfg.MaxStakeDuration = math.MaxInt64
@@ -2089,7 +2091,7 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				env := newValidTransformSubnetTxVerifyEnv(t, ctrl)
 				env.state = state.NewMockDiff(ctrl)
 				subnetOwner := fx.NewMockOwner(ctrl)
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 				env.state.EXPECT().GetSubnetOwner(env.unsignedTx.Subnet).Return(subnetOwner, nil)
 				env.state.EXPECT().GetSubnetTransformation(env.unsignedTx.Subnet).Return(nil, database.ErrNotFound).Times(1)
 				env.fx.EXPECT().VerifyPermission(gomock.Any(), env.unsignedTx.SubnetAuth, env.tx.Creds[len(env.tx.Creds)-1], subnetOwner).Return(nil)
@@ -2125,7 +2127,7 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 
 				// Set dependency expectations.
 				subnetOwner := fx.NewMockOwner(ctrl)
-				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime)
+				env.state.EXPECT().GetTimestamp().Return(env.latestForkTime).Times(2)
 				env.state.EXPECT().GetSubnetOwner(env.unsignedTx.Subnet).Return(subnetOwner, nil).Times(1)
 				env.state.EXPECT().GetSubnetTransformation(env.unsignedTx.Subnet).Return(nil, database.ErrNotFound).Times(1)
 				env.fx.EXPECT().VerifyPermission(env.unsignedTx, env.unsignedTx.SubnetAuth, env.tx.Creds[len(env.tx.Creds)-1], subnetOwner).Return(nil).Times(1)

@@ -46,6 +46,20 @@ var (
 	feeTestDefaultStakeWeight = uint64(2024)
 )
 
+func init() {
+	err := ResetDynamicConfig(
+		&snow.Context{
+			NetworkID: constants.LocalID,
+		},
+		&fees.DynamicFeesConfig{
+			FeeRate:            testFeeRates,
+			BlockMaxComplexity: testBlockMaxComplexity,
+		})
+	if err != nil {
+		panic(err)
+	}
+}
+
 func TestAddAndRemoveFees(t *testing.T) {
 	r := require.New(t)
 
