@@ -563,6 +563,9 @@ func (t *Transitive) repoll(ctx context.Context) {
 // If we do not have [blkID], request it.
 // Returns true if the block is processing in consensus or is decided.
 func (t *Transitive) issueFromByID(ctx context.Context, nodeID ids.NodeID, blkID ids.ID) (bool, error) {
+	if t.blkReqs.Contains(blkID) {
+		return false, nil
+	}
 	blk, err := t.GetBlock(ctx, blkID)
 	if err != nil {
 		t.sendRequest(ctx, nodeID, blkID)
